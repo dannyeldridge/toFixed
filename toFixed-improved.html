@@ -1,0 +1,109 @@
+<script src="./simpletest.js"></script>
+
+<script>
+  /** 
+   * 
+   * The toFixed() method formats a number using fixed-point notation.
+   * 
+   * Function signature:
+   * toFixed(numberToRound[, precision])
+   * 
+   */
+
+  function toFixed(value, precision) {
+    if (typeof value != 'number') {
+      throw new TypeError('Value must be a number.');
+    }
+
+    if (precision) {
+      if (typeof precision != 'number') {
+        throw new TypeError('Prcision must be a number.');
+      }
+
+      if (precision < 0) {
+        throw new RangeError('Precision must be between 0 and 20.');
+      }
+
+      precision = Math.floor(precision);
+
+      if (precision > 20) {
+        throw new RangeError('Precision must be between 0 and 20.');
+      }
+    }
+
+    if (!precision || precision === 0) {
+      return value.toString();
+    }
+
+    var numString = value.toString() 
+    var stringArray = numString.split('.') 
+
+    if (stringArray.length == 1) { 
+      numString += '.'
+      for (let i=0; i<precision; i++) {
+        numString += '0';
+      } 
+      return numString;
+    }
+
+    var newDecimalPart = stringArray[1].slice(0, precision) 
+
+    if (stringArray[1].charAt(precision) >= 5) {
+      newDecimalPart = Number(newDecimalPart) + 1 
+      newDecimalPart = newDecimalPart.toString(); 
+    }
+    
+    stringArray[1] = newDecimalPart
+    return stringArray.join('.');
+  }
+
+  tests({
+    'It should round numbers with decimals according to the level of precision': function() {   
+      var num = 10.235   
+      assertStrictEquals(toFixed(10.235, 2), '10.24');
+      assertStrictEquals(toFixed(10.22227, 4), '10.2223');
+    },
+    'It should round numbers without decimals according to the level of precision': function() {
+      assertStrictEquals(toFixed(101, 2), '101.00');
+    },
+    'It should return the number formatted as a string if precision is 0 or omitted.': function() {
+      assertStrictEquals(toFixed(123), "123");
+      assertStrictEquals(toFixed(123, 0), "123");
+    },
+    'It should throw an error if no value is provided': function() {
+      try {
+        toFixed();
+      } catch (error) {
+        var e = error;
+      }
+      assertStrictEquals(e.toString().includes('TypeError'), true)
+      
+    },
+    'It should throw an error if value is not a number': function() {
+      try {
+        debugger;
+        toFixed();
+      } catch (error) {
+        var e = error;
+      }
+      assertStrictEquals(e.toString().includes('TypeError'), true)
+      
+    },
+    'It should throw an error if precision is not between 0-20 inclusive.': function () {
+      try {
+        toFixed(1, 21)
+      } catch (error) {
+        var e = error;
+      }
+      assertStrictEquals(e.toString().includes('RangeError'), true);
+
+      try {
+        toFixed(1, -1)
+      } catch (error) {
+        var err = error;
+      }
+      assertStrictEquals(err.toString().includes('RangeError'), true);
+    }
+  });
+  
+</script>
