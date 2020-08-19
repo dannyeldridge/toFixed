@@ -46,11 +46,33 @@
       return numString;
     }
 
-    var newDecimalPart = stringArray[1].slice(0, precision) 
+    var newDecimalPart = stringArray[1].slice(0, precision)
 
-    if (stringArray[1].charAt(precision) >= 5) {
-      newDecimalPart = Number(newDecimalPart) + 1 
-      newDecimalPart = newDecimalPart.toString(); 
+    if (precision > stringArray[1].length) {
+      var zerosToAdd = precision - stringArray[1].length
+      for (var i = 0; i < zerosToAdd; i ++ )
+        newDecimalPart += '0'
+    } else {
+
+      if (stringArray[1].charAt(precision) >= 5) {
+        
+        var decimalArray = [];
+        for (var i = 0; i < newDecimalPart.length; i++ ) {
+          decimalArray.push(newDecimalPart.charAt(i))
+        }
+
+        var checkIfIsNine  = function(num) {
+            return num == 9
+        }
+        if (decimalArray.every(checkIfIsNine)) {
+          newDecimalPart = ''
+          for (var i = 0; i< precision; i++) { newDecimalPart += '0'}
+          stringArray[0] = (parseInt(stringArray[0]) + 1).toString()
+        } else {
+          newDecimalPart = Number(newDecimalPart) + 1 
+          newDecimalPart = newDecimalPart.toString(); 
+        }
+      }
     }
     
     stringArray[1] = newDecimalPart
@@ -81,7 +103,6 @@
     },
     'It should throw an error if value is not a number': function() {
       try {
-        debugger;
         toFixed();
       } catch (error) {
         var e = error;
@@ -103,6 +124,14 @@
         var err = error;
       }
       assertStrictEquals(err.toString().includes('RangeError'), true);
+    },
+    'It should handle rounding .99 correctly': function() {
+      var result = toFixed(29.99, 1);
+      assertStrictEquals(result, "30.0")
+      assertStrictEquals(toFixed(29.999,2), "30.00")
+    },
+    'It should add the appropriate number of zeros': function() {
+      assertStrictEquals(toFixed(.99,5), "0.99000")
     }
   });
   
